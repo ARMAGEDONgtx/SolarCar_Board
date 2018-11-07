@@ -46,6 +46,12 @@ class App(QMainWindow):
         #self.showFullScreen()
         self.show()
 
+    def closeEvent(self, QCloseEvent):
+        super(QMainWindow,self).closeEvent(QCloseEvent)
+        self.mainWidget.lightsTab.graph.thread1.stop()
+        self.mainWidget.lightsTab.graph.pomiar1.thread1.stop()
+
+
 class TabView(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
