@@ -19,10 +19,10 @@ class App(QMainWindow):
         self.title = 'SolarCar'
         self.left = 0
         self.top = 0
-        self.width = 800
-        self.height = 1280
+        #self.width = 1000
+        #self.height = 1280
         self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+        #self.setGeometry(self.left, self.top, self.width, self.height)
 
         self.mainWidget = TabView(self)
         self.setCentralWidget(self.mainWidget)

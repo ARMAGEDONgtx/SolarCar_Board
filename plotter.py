@@ -13,6 +13,8 @@ import threading as th
 matplotlib.use("Qt5Agg", warn = False, force = True)
 
 class PlotCanvas(FigureCanvas):
+
+
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         plt.xticks(rotation=90)
         plt.style.use('seaborn-pastel')
@@ -113,6 +115,7 @@ class PlotCanvas(FigureCanvas):
                         self.anim(self.pomiar1.ys, self.pomiar1.xs)
                         #self.handle_new_data(last_row[2],last_row[1])
                         self.pomiar1.last_update = last_row[2]
+                        self.pomiar1.new_data.emit(last_row[1])
                     conn.close()
                     time.sleep(1)
         except Exception as e:

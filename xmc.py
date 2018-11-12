@@ -23,6 +23,10 @@ class pomiar(PyQt5.QtCore.QObject):
         self.last_update = timestamp
         self.xs = []
         self.ys = []
+        self.average = 0
+        self.minimum = 0
+        self.maximum = 0
+        self.last_value = 0
         self.thread1 = mythread.StoppableThread(target=self.generate_random_data)
         # signal
 
@@ -54,3 +58,10 @@ class pomiar(PyQt5.QtCore.QObject):
         finally:
             if conn is not None:
                 conn.close()
+
+    #update parameters
+    def update(self):
+        self.average = sum(self.xs)/len(self.xs)
+        self.minimum = min(self.xs)
+        self.maximum = max(self.xs)
+
