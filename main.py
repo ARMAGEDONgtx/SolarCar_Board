@@ -8,7 +8,7 @@ from lights import LightsView
 from inverters import InvertersView
 from battery import BatteryView
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget, QVBoxLayout
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
 
@@ -48,8 +48,7 @@ class App(QMainWindow):
 
     def closeEvent(self, QCloseEvent):
         super(QMainWindow,self).closeEvent(QCloseEvent)
-        self.mainWidget.lightsTab.graph.thread1.stop()
-        self.mainWidget.lightsTab.graph.pomiar1.thread1.stop()
+
 
 
 class TabView(QWidget):
@@ -65,14 +64,18 @@ class TabView(QWidget):
         self.batteryTab = BatteryView(self)
 
         #Add tabs
-        self.tabs.addTab(self.homeTab, 'Home')
-        self.tabs.addTab(self.lightsTab, 'Lights')
-        self.tabs.addTab(self.invertersTab, 'Inverter')
-        self.tabs.addTab(self.batteryTab, 'Battery')
+        self.tabs.addTab(self.homeTab,  QtGui.QIcon("other/home.png"), '')
+        self.tabs.addTab(self.lightsTab, QtGui.QIcon("other/light.png"),'')
+        self.tabs.addTab(self.invertersTab,QtGui.QIcon("other/engine.png"), '')
+        self.tabs.addTab(self.batteryTab, QtGui.QIcon("other/battery.png"),'')
+
+        self.tabs.setIconSize(QtCore.QSize(40,40))
+
 
         #Add tabs to widget
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
+
 
 
 if __name__ == '__main__':

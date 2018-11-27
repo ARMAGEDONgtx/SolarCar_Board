@@ -1,63 +1,45 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget, QVBoxLayout, QHBoxLayout
-from matplotlib.backends.backend_qt5agg import (
-        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
-from plotter import PlotCanvas
-import mycalendar
-import plot_controller
-import PyQt5.QtWidgets as wgt
-from PyQt5 import QtCore, QtGui, QtWidgets
 
+from PyQt5 import QtCore, QtGui, QtWidgets
+from mytab import Tab
 
 
 class LightsView(QWidget):
     def __init__(self, parent):
-
         super(QWidget, self).__init__(parent)
-        self.setObjectName("LightView")
-        self.layoutmain = QHBoxLayout(self)
-        self.layoutmain.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+
         self.layout = QVBoxLayout(self)
-        self.graph = PlotCanvas(self, width=8, height=6)
-        self.layout.addWidget(self.graph)
-        self.toolbar = NavigationToolbar(self.graph, parent)
-        self.layout.addWidget(self.toolbar)
+        self.upperlay = QHBoxLayout(self)
+        self.add_button = QtWidgets.QPushButton(self)
+        self.spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.upperlay.addWidget(self.add_button)
+        self.upperlay.addItem(self.spacer)
+
+        # Initialize tab screen
+        self.tabs = QTabWidget()
+        self.homeTab = Tab(self)
+        self.tabs.setTabsClosable(True)
 
 
-        ################################   BUTTONS ETC.     ##################################################
+
+        # Add tabs
+        self.tabs.addTab(self.homeTab, '1')
 
 
-        ##### CONTROLER SETUP #####################################################
-        self.controler = plot_controller.controller()
-        self.controler.setupUi()
-        self.controler.bind_thread(self.graph.thread1)
+        # Add tabs to widget
+        self.layout.addLayout(self.upperlay)
+        self.layout.addWidget(self.tabs)
+        self.setLayout(self.layout)
 
 
-        ##### LAYOUT MANAGMENT   ##################################################
-        self.layoutmain.addLayout(self.layout)
-        self.layout_controler = QVBoxLayout(self)
-        self.layout_controler.addWidget(self.controler)
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.layout_controler.addItem(spacerItem)
-        self.layoutmain.addLayout(self.layout_controler)
-        self.setLayout(self.layoutmain)
-
-
-        ###################  SIGNALS AND SLOTS  #############################################################
-        self.controler.pushButton_init.clicked.connect(self.graph.start_thread)
-        self.graph.pomiar1.new_data.connect(self.handle_new_data)
-        self.controler.pushButton_stop.clicked.connect(self.graph.stop_thread)
-        self.controler.cal.plot_on_close.connect(self.graph.data_btwn_dates)
+        #Signals
+        self.tabs.tabCloseRequested.connect(self.closeMyTab)
+        self.add_button.clicked.connect(self.addMyTab)
         QtCore.QMetaObject.connectSlotsByName(self)
 
-    # function called when new data appears
-    def handle_new_data(self, value):
-        try:
-            self.graph.pomiar1.last_value = value
-            self.graph.pomiar1.update()
-            self.controler.display_parameters(self.graph.pomiar1.average, self.graph.pomiar1.minimum, self.graph.pomiar1.maximum , self.graph.pomiar1.last_value)
-        except Exception as e:
-            print(e)
+    def closeMyTab(self, tab):
+        self.tabs.removeTab(tab)
 
-
-
-
+    def addMyTab(self):
+        NewTab = Tab(self)
+        self.tabs.addTab(NewTab,'ok')

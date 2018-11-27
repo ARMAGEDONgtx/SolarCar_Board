@@ -9,13 +9,14 @@ import mythread
 import xmc
 from PyQt5 import QtCore
 import threading as th
+import json
 
 matplotlib.use("Qt5Agg", warn = False, force = True)
 
 class PlotCanvas(FigureCanvas):
 
 
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, measure, parent=None, width=5, height=4, dpi=100):
         plt.xticks(rotation=90)
         plt.style.use('seaborn-pastel')
         plt.rcParams['font.family'] = 'serif'
@@ -48,9 +49,10 @@ class PlotCanvas(FigureCanvas):
         logo = plt.imread('/home/wroblem/projects/my_solar/solar_napis.png')
         self.ax.figure.figimage(logo, 80, 70, alpha=.1, zorder=1)
         ###################   THREAD FOR GENERATING DATA #####################################################
-        self.thread1 = mythread.StoppableThread(target=self.live_data)
+        self.binded_measure = measure
+        self.thread1 = mythread.StoppableThread(target=self.live_data, args=(self.binded_measure))
         ######################################################################################################
-        self.pomiar1 = xmc.pomiar(5)
+
 
     #### setting up  some parameters of plots ###########
     def setup(self):
@@ -100,57 +102,45 @@ class PlotCanvas(FigureCanvas):
     #we store time of the last probe and if we find
     #data with later timer we plot it on the graph
     def live_data(self):
-        conn = None
         try:
             while True:
                 if self.thread1.stopped() == True:
                     break
                 if self.thread1.paused() == False :
-                    conn = sql.connect_to_sql()
-                    last_row = sql.check_last_row(conn, self.pomiar1.last_update)
+                    last_row = sql.check_last_row(self.binded_measure)
                     print(last_row)
                     if last_row[0] == False:
-                        self.pomiar1.xs.append(last_row[1])
-                        self.pomiar1.ys.append(last_row[2])
-                        self.anim(self.pomiar1.ys, self.pomiar1.xs)
-                        #self.handle_new_data(last_row[2],last_row[1])
-                        self.pomiar1.last_update = last_row[2]
-                        self.pomiar1.new_data.emit(last_row[1])
-                    conn.close()
+                        self.binded_measure.xs.append(last_row[1])
+                        self.binded_measure.ys.append(self.binded_measure.last_update)
+                        self.anim(self.binded_measure.ys, self.binded_measure.xs)
+                        self.binded_measure.new_data.emit(last_row[1])
                     time.sleep(1)
         except Exception as e:
             print(e)
-        finally:
-            if conn is not None:
-                conn.close()
+
 
     #plot all data that is beetween selected dates
     def data_btwn_dates(self, start_dt, end_dt):
-        conn = None
         try:
             #start_dt = QtCore.QDateTime(self.m_calendar.start_date(),self.m_calendar.start_time()).toPyDateTime()
             #end_dt = QtCore.QDateTime(self.m_calendar.end_date(),self.m_calendar.end_time()).toPyDateTime()
             #print(type(start_dt))
             #print(type(end_dt))
-            conn = sql.connect_to_sql()
-            dat = sql.logs_btwn_dates(conn,start_dt,end_dt)
+            dat = sql.logs_btwn_dates(start_dt,end_dt, self.binded_measure.measurment_id)
             self.ax.clear()
             self.setup()
             self.set_xlimits(start_dt, end_dt)
             th.Thread(target=self.plot_in_thread, args=(dat,)).start()
-            conn.close()
         except Exception as e:
             print(e)
-        finally:
-            if conn is not None:
-                conn.close()
+
 
     #function used in thread to plot big amoant of data in another thread
     def plot_in_thread(self, dat):
         tmp = False
         if dat is not None:
             for x in dat:
-                self.plot(x[0], x[1])
+                self.plot( x[0],(json.loads(x[1])['value']))
                 if tmp is False:
                     self.draw_legend()
                     tmp = True
@@ -158,25 +148,22 @@ class PlotCanvas(FigureCanvas):
 
     def start_thread(self):
         try:
-            self.thread1.start()
-            self.pomiar1.thread1.start()
+            if self.binded_measure.measurment_id is not None:
+                self.thread1.start()
         except Exception as e:
             print(str(e))
 
     def pause_thread(self):
         try:
-            if self.thread1.paused() == True and self.pomiar1.thread1.paused() == True:
+            if self.thread1.paused() == True :
                 self.thread1.unpause()
-                self.pomiar1.thread1.unpause()
             else:
                 self.thread1.pause()
-                self.pomiar1.thread1.pause()
         except Exception as e:
             print(str(e))
 
     def stop_thread(self):
         try:
             self.thread1.stop()
-            self.pomiar1.thread1.stop()
         except Exception as e:
             print(str(e))

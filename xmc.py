@@ -6,7 +6,7 @@ import time
 import mythread
 import sql_functions as sql
 
-# helpful class for managing data from xmc controlers and plots
+# class for managing data from xmc controlers and plots
 
 
 class pomiar(PyQt5.QtCore.QObject):
@@ -14,7 +14,7 @@ class pomiar(PyQt5.QtCore.QObject):
 
     new_data = PyQt5.QtCore.pyqtSignal(int)
 
-    def __init__(self, probe=1, limit=100):
+    def __init__(self, probe=5, limit=100):
         PyQt5.QtCore.QObject.__init__(self)
         self.frequency = probe
         self.max_probes = limit
@@ -27,6 +27,7 @@ class pomiar(PyQt5.QtCore.QObject):
         self.minimum = 0
         self.maximum = 0
         self.last_value = 0
+        self.measurment_id = None
         self.thread1 = mythread.StoppableThread(target=self.generate_random_data)
         # signal
 
@@ -51,7 +52,9 @@ class pomiar(PyQt5.QtCore.QObject):
                 if self.thread1.stopped() == True:
                     break
                 if self.thread1.paused() == False:
-                    sql.put_random_data_SQL(conn)
+                    if self.measurment_id is not None:
+                        sql.put_random_json_SQL(conn,self.measurment_id)
+                        print(self.measurment_id)
                     time.sleep(self.frequency)
         except Exception as e:
             print(e)
@@ -59,9 +62,12 @@ class pomiar(PyQt5.QtCore.QObject):
             if conn is not None:
                 conn.close()
 
+
     #update parameters
     def update(self):
         self.average = sum(self.xs)/len(self.xs)
         self.minimum = min(self.xs)
         self.maximum = max(self.xs)
 
+if __name__ == "__main__":
+    print("XD")

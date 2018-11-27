@@ -9,9 +9,15 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 import mycalendar
+import sql_functions as sql
+from xmc import pomiar
 
 class controller(QtWidgets.QWidget):
-    def setupUi(self):
+
+
+    def setupUi(self, measure , id_obiektu):
+        self.controled_measure = measure
+        self.controled_thread = None
         ## WHOLE SHIT FROM QTDESIGNER AND PYUIC5##############################
 
         self.Form = QtWidgets.QWidget()
@@ -60,6 +66,7 @@ class controller(QtWidgets.QWidget):
         self.comboBox.setObjectName("comboBox")
         self.horizontalLayout.addWidget(self.comboBox)
         self.verticalLayout.addLayout(self.horizontalLayout)
+        self.comboBox.setSizeAdjustPolicy(3)
 
 
         #play button
@@ -216,20 +223,37 @@ class controller(QtWidgets.QWidget):
         self.verticalLayout.addLayout(self.horizontalLayout_8)
         self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
 
+        # generate data button
+        self.pushButton_generate = QtWidgets.QPushButton(self.Form)
+        self.pushButton_generate.setText("Generate Data")
+        self.pushButton_generate.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.pushButton_generate.setObjectName("pushButton_generate")
+        self.verticalLayout.addWidget(self.pushButton_generate)
+
         #slider
         self.slider_time = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.slider_time.setObjectName("slider_time")
         self.slider_time.setMinimum(1)
         self.slider_time.setMaximum(20)
         self.verticalLayout.addWidget(self.slider_time)
-        #self.slider_time.setValue(self.graph.pomiar1.frequency)
+        self.slider_time.setValue(self.controled_measure.frequency)
+
 
         ##### CALENDAR SETUP ######################################################
         self.cal = mycalendar.calendar()
         self.cal.setupUi()
 
         ##########################################################################
-        self.controled_thread = None
+        #add objects to combobox
+        self.comboBox.addItem("")
+        if id_obiektu is not None:
+            conn = sql.connect_to_sql()
+            list = sql.avaiable_measurments(conn, id_obiektu)
+            for x in list:
+                self.comboBox.addItem(x[1])
+            conn.close()
+
+
         self.retranslateUi()
         self.setLayout(self.gridLayout)
 
@@ -238,7 +262,9 @@ class controller(QtWidgets.QWidget):
         self.pushButton_pause.clicked.connect(self.handle_pause)
         self.pushButton_stop.clicked.connect(self.handle_stop)
         self.pushButton_cal.clicked.connect(self.show_calendar)
-        #self.slider_time.valueChanged.connect(self.handle_slider)
+        self.pushButton_generate.clicked.connect(self.handle_generate)
+        self.comboBox.currentIndexChanged.connect(self.handle_combobox)
+        self.slider_time.valueChanged.connect(self.handle_slider)
         QtCore.QMetaObject.connectSlotsByName(self)
 
     def retranslateUi(self):
@@ -258,6 +284,7 @@ class controller(QtWidgets.QWidget):
     #function called when play button is clicked
     def handle_play(self):
         try:
+            self.controled_measure.thread1.unpause()
             if self.controled_thread is not None:
                 self.controled_thread.unpause()
         except Exception as e:
@@ -266,6 +293,7 @@ class controller(QtWidgets.QWidget):
     # function called when pause button is clicked
     def handle_pause(self):
         try:
+            self.controled_measure.thread1.pause()
             if self.controled_thread is not None:
                 self.controled_thread.pause()
         except Exception as e:
@@ -274,6 +302,7 @@ class controller(QtWidgets.QWidget):
     # function called when stop button is clicked
     def handle_stop(self):
         try:
+            self.controled_measure.thread1.stop()
             if self.controled_thread is not None:
                 self.controled_thread.stop()
         except Exception as e:
@@ -283,10 +312,6 @@ class controller(QtWidgets.QWidget):
     def show_calendar(self):
         self.cal.show()
 
-    # function called when slider value is changed
-    def handle_slider(self):
-        self.graph.pomiar1.frequency = self.slider_time.value()
-
     # update lcd display
     def display_parameters(self,average, min, max, last):
         self.lcd_average.display(average)
@@ -294,10 +319,25 @@ class controller(QtWidgets.QWidget):
         self.lcd_maximum.display(max)
         self.lcd_lastvalue.display(last)
 
+    #combobox changed
+    def handle_combobox(self):
+        conn = sql.connect_to_sql()
+        self.controled_measure.measurment_id = sql.nazwa_pomiaru_to_id(conn, self.comboBox.currentText())
+        #print(self.controled_measure.measurment_id)
+        conn.close()
+
+    # generate button clicked
+    def handle_generate(self):
+        if self.controled_measure.measurment_id is not None:
+            self.controled_measure.thread1.start()
+
+    #slider value cahnged
+    def handle_slider(self):
+        self.controled_measure.frequency = self.slider_time.value()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     con = controller()
-    con.setupUi()
+    con.setupUi(1)
     con.show()
     sys.exit(app.exec_())
