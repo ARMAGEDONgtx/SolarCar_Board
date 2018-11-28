@@ -1,10 +1,8 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget, QVBoxLayout, QHBoxLayout
 from matplotlib.backends.backend_qt5agg import (
         FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
-from plotter import PlotCanvas
-import mycalendar
-import plot_controller
-import PyQt5.QtWidgets as wgt
+from mywidgets.plotter import PlotCanvas
+import mywidgets.plot_controller
 from PyQt5 import QtCore, QtGui, QtWidgets
 from xmc import pomiar
 
@@ -22,13 +20,13 @@ class Tab(QWidget):
         self.layout.addWidget(self.graph)
         self.toolbar = NavigationToolbar(self.graph, parent)
         self.layout.addWidget(self.toolbar)
-
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         ################################   BUTTONS ETC.     ##################################################
 
 
         ##### CONTROLER SETUP #####################################################
-        self.controler = plot_controller.controller()
+        self.controler = mywidgets.plot_controller.controller()
         self.controler.setupUi(self.own_measure,1)
         self.controler.bind_thread(self.graph.thread1)
 
@@ -58,6 +56,11 @@ class Tab(QWidget):
             self.controler.display_parameters(self.controler.controled_measure.average, self.controler.controled_measure.minimum, self.controler.controled_measure.maximum , self.controler.controled_measure.last_value)
         except Exception as e:
             print(e)
+
+    #function called when tabs is about to close
+    def handleClose(self):
+        self.controler.handle_stop()
+
 
 
 

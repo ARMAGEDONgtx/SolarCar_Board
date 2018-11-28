@@ -8,9 +8,9 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
-import mycalendar
+import mywidgets.mycalendar
 import sql_functions as sql
-from xmc import pomiar
+
 
 class controller(QtWidgets.QWidget):
 
@@ -240,7 +240,7 @@ class controller(QtWidgets.QWidget):
 
 
         ##### CALENDAR SETUP ######################################################
-        self.cal = mycalendar.calendar()
+        self.cal = mywidgets.mycalendar.calendar()
         self.cal.setupUi()
 
         ##########################################################################
@@ -328,8 +328,11 @@ class controller(QtWidgets.QWidget):
 
     # generate button clicked
     def handle_generate(self):
-        if self.controled_measure.measurment_id is not None:
-            self.controled_measure.thread1.start()
+        try:
+            if self.controled_measure.measurment_id is not None:
+                self.controled_measure.thread1.start()
+        except Exception as e:
+            print(str(e))
 
     #slider value cahnged
     def handle_slider(self):

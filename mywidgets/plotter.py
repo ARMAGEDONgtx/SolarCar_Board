@@ -6,8 +6,6 @@ import matplotlib
 import sql_functions as sql
 import time
 import mythread
-import xmc
-from PyQt5 import QtCore
 import threading as th
 import json
 

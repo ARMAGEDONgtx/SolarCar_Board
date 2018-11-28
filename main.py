@@ -1,6 +1,7 @@
 import sys
 import matplotlib
 
+
 matplotlib.use("Qt5Agg", warn = False, force = True)
 
 from home import HomeView
@@ -11,7 +12,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QAc
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
-
+import qdarkstyle
 
 class App(QMainWindow):
     def __init__(self):
@@ -27,7 +28,9 @@ class App(QMainWindow):
         self.mainWidget = TabView(self)
         self.setCentralWidget(self.mainWidget)
 
-        self.setStyleSheet("""
+
+
+        self.tmp = """
             QTabBar::tab {
                 background: lightgray;
                 color: black;
@@ -41,12 +44,13 @@ class App(QMainWindow):
                 background: gray;
                 color: white;
             }
-        """)
+        """
 
         #self.showFullScreen()
         self.show()
 
     def closeEvent(self, QCloseEvent):
+        self.mainWidget.lightsTab.exitHandler()
         super(QMainWindow,self).closeEvent(QCloseEvent)
 
 
@@ -81,4 +85,5 @@ class TabView(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = App()
+    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     sys.exit(app.exec_())
