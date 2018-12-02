@@ -24,6 +24,7 @@ class pomiar(PyQt5.QtCore.QObject):
         self.xs = []
         self.ys = []
         self.average = 0
+        self.av = []
         self.minimum = 0
         self.maximum = 0
         self.last_value = 0

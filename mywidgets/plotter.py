@@ -8,6 +8,7 @@ import time
 import mythread
 import threading as th
 import json
+import numpy as np
 
 matplotlib.use("Qt5Agg", warn = False, force = True)
 
@@ -56,7 +57,7 @@ class PlotCanvas(FigureCanvas):
     def setup(self):
         # setting up axes
         self.ax = self.figure.add_subplot(111)
-        self.ax.set_title('Time over value', fontstyle='italic', loc='left', fontsize=20, color='orange')
+        self.ax.set_title('Time over value', fontstyle='italic', loc='left', fontsize=20, color='royalblue')
         self.ax.set_title('PUT Solar Dynamics', loc='right', fontsize=12, color='grey', fontstyle='italic')
         self.ax.set_ylabel('Value[%]', fontstyle='italic')
         self.ax.set_xlabel('Time[date]', fontstyle='italic')
@@ -74,14 +75,16 @@ class PlotCanvas(FigureCanvas):
         self.draw()
 
     #### function for live ploting ####################
-    def anim(self, xs, ys):
+    def anim(self, mes):
         # Limit x and y lists to 20 items
-        xs = xs[-20:]
-        ys = ys[-20:]
+        xs = np.array(mes.xs[-20:])
+        ys = np.array(mes.ys[-20:])
+        av = np.array(mes.av[-20:])
         # Draw x and y lists
         self.ax.clear()
         self.setup()
-        self.ax.plot(xs, ys, label = 'wykres', c = 'orchid')
+        self.ax.plot(ys, xs, label = 'wykres', c = 'royalblue', marker = 'o',markeredgecolor = 'black')
+        self.ax.plot(ys, av,label = 'average', c = 'orchid', linestyle = 'dashed')
         self.draw_legend()
         self.ax.tick_params(axis='x', rotation=45)
         self.draw()
@@ -89,7 +92,7 @@ class PlotCanvas(FigureCanvas):
 
 
     def draw_legend(self):
-        self.ax.legend(numpoints=1, fancybox=True, shadow='True', borderpad=1)
+        self.ax.legend(numpoints=1, fancybox=True, shadow='True', borderpad=1, loc='upper right')
 
 
     def set_xlimits(self,lower,upper):
@@ -110,8 +113,9 @@ class PlotCanvas(FigureCanvas):
                     if last_row[0] == False:
                         self.binded_measure.xs.append(last_row[1])
                         self.binded_measure.ys.append(self.binded_measure.last_update)
-                        self.anim(self.binded_measure.ys, self.binded_measure.xs)
+                        self.binded_measure.av.append(np.mean(self.binded_measure.xs))
                         self.binded_measure.new_data.emit(last_row[1])
+                        self.anim(self.binded_measure)
                     time.sleep(1)
         except Exception as e:
             print(e)
@@ -125,6 +129,7 @@ class PlotCanvas(FigureCanvas):
             #print(type(start_dt))
             #print(type(end_dt))
             dat = sql.logs_btwn_dates(start_dt,end_dt, self.binded_measure.measurment_id)
+            print(dat)
             self.ax.clear()
             self.setup()
             self.set_xlimits(start_dt, end_dt)

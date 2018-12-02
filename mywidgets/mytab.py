@@ -8,7 +8,7 @@ from xmc import pomiar
 
 
 class Tab(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, mes_id):
         self.own_measure = pomiar()
 
         super(QWidget, self).__init__(parent)
@@ -27,7 +27,7 @@ class Tab(QWidget):
 
         ##### CONTROLER SETUP #####################################################
         self.controler = mywidgets.plot_controller.controller()
-        self.controler.setupUi(self.own_measure,1)
+        self.controler.setupUi(self.own_measure,mes_id)
         self.controler.bind_thread(self.graph.thread1)
 
 
@@ -42,7 +42,7 @@ class Tab(QWidget):
 
 
         ###################  SIGNALS AND SLOTS  #############################################################
-        self.controler.pushButton_init.clicked.connect(self.graph.start_thread)
+        self.controler.pushButton_init.clicked.connect(self.start_live)
         self.controler.controled_measure.new_data.connect(self.handle_new_data)
         self.controler.pushButton_stop.clicked.connect(self.graph.stop_thread)
         self.controler.cal.plot_on_close.connect(self.graph.data_btwn_dates)
@@ -61,6 +61,9 @@ class Tab(QWidget):
     def handleClose(self):
         self.controler.handle_stop()
 
+    def start_live(self):
+        self.graph.start_thread()
+        self.controler.live_status()
 
 
 

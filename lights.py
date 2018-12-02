@@ -10,15 +10,22 @@ class LightsView(QWidget):
         self.counter = 1
         self.layout = QVBoxLayout(self)
         self.upperlay = QHBoxLayout(self)
+
+        #Add button
         self.add_button = QtWidgets.QPushButton(self)
-        self.add_button.setText("Add Tab")
+        self.add_button.setText("")
+        self.add_button.setIcon(QtGui.QIcon("other/add.png"))
+        self.add_button.setIconSize(QtCore.QSize(30, 20))
+        self.add_button.setFlat(True)
+        self.add_button.setFocusPolicy(QtCore.Qt.NoFocus)
+
         self.spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.upperlay.addWidget(self.add_button)
         self.upperlay.addItem(self.spacer)
 
         # Initialize tab screen
         self.tabs = QTabWidget()
-        self.homeTab = Tab(self)
+        self.homeTab = Tab(self, 1)
         self.tabs.setTabsClosable(True)
 
         # Add tabs
@@ -43,7 +50,7 @@ class LightsView(QWidget):
 
     # fucntion called to add new tab
     def addMyTab(self):
-        NewTab = Tab(self)
+        NewTab = Tab(self, 1)
         self.counter = self.counter + 1
         self.tabs.addTab(NewTab,str(self.counter))
 

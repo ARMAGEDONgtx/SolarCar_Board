@@ -287,6 +287,7 @@ class controller(QtWidgets.QWidget):
             self.controled_measure.thread1.unpause()
             if self.controled_thread is not None:
                 self.controled_thread.unpause()
+            self.live_status()
         except Exception as e:
             print(str(e))
 
@@ -296,6 +297,7 @@ class controller(QtWidgets.QWidget):
             self.controled_measure.thread1.pause()
             if self.controled_thread is not None:
                 self.controled_thread.pause()
+            self.live_status()
         except Exception as e:
             print(str(e))
 
@@ -305,6 +307,7 @@ class controller(QtWidgets.QWidget):
             self.controled_measure.thread1.stop()
             if self.controled_thread is not None:
                 self.controled_thread.stop()
+            self.live_status()
         except Exception as e:
             print(str(e))
 
@@ -337,6 +340,17 @@ class controller(QtWidgets.QWidget):
     #slider value cahnged
     def handle_slider(self):
         self.controled_measure.frequency = self.slider_time.value()
+
+    #manage live status
+    def live_status(self):
+        if self.controled_thread.stopped() is True:
+            self.setStyleSheet('QLabel#label_live {color: red;}')
+        elif self.controled_thread.paused() is True:
+            self.setStyleSheet('QLabel#label_live {color: yellow;}')
+        elif self.controled_thread.started() is True:
+            self.setStyleSheet('QLabel#label_live {color: green;}')
+        else:
+            self.setStyleSheet('QLabel#label_live {color: white;}')
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

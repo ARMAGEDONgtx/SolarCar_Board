@@ -21,5 +21,9 @@ class StoppableThread(threading.Thread):
     def unpause(self):
         self._pause_event.clear()
 
+
     def paused(self):
         return self._pause_event.is_set()
+
+    def started(self):
+        return self.is_alive()
