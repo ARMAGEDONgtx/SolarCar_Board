@@ -1,9 +1,6 @@
 import sys
 import matplotlib
-
-
 matplotlib.use("Qt5Agg", warn = False, force = True)
-
 from home import HomeView
 from lights import LightsView
 from inverters import InvertersView

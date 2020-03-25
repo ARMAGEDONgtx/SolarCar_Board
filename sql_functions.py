@@ -1,15 +1,18 @@
+#File containg all functions handling sql database
+
+
 import mysql.connector
 import datetime
 import random
 import time
 import json
 
-##### MY SQL TABLE
-##### time czas | real wartosc
-#####
 
 ######### CONNECT TO MYSQL DATABASE WITH DEFINED CREDENTIALS ##############
+#user crediential must be provided
+#database name and its location(IP adress, if on the same machine its 127.0.0.1)
 def connect_to_sql():
+    cnx = None
     try:
         cnx = mysql.connector.connect(user='xmc_user', password='solarnewariaty2018', host='127.0.0.1', database='test')
         if cnx.is_connected():
@@ -23,6 +26,8 @@ def connect_to_sql():
 
 
 ###### GENERATE AND PUT RANDOM DATA TO DATABASE#############################
+#function created for test purposes
+#in futere date will come frome other devieces
 def put_random_data_SQL(connection):
     try:
         ts = time.time()
@@ -38,6 +43,8 @@ def put_random_data_SQL(connection):
 
 
 ###### GENERATE AND PUT RANDOM JSON TO DATABASE#############################
+#function created for test purposes
+#in futere date will come frome other devieces
 def put_random_json_SQL(connection, object_id):
     if object_id is None:
         return None
@@ -54,6 +61,7 @@ def put_random_json_SQL(connection, object_id):
 
 
 ####### RETURN ROWS THAT ARE BEETWEEN SELECTED DATES ############################
+#function for historical plots, allows to check date beetween dates
 def logs_btwn_dates(start, end, pom_id):
     if pom_id is None:
         return None
