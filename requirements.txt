@@ -27,7 +27,7 @@ MarkupSafe==0.23
 matplotlib==2.2.3
 mysql-connector==2.1.6
 mysql-connector-python-rf==2.2.2
-numpy==1.15.0
+numpy==1.22.0
 oauthlib==1.0.3
 onboard==1.2.0
 openpyxl==2.5.7
